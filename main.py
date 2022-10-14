@@ -40,9 +40,9 @@ def third_y(T, P , x, cons):
 if __name__ == '__main__':
     def slava_merlow():
 
-        SRC = Path(os.getcwd())
-        SRC_True = (SRC / 'Documents' / 'Github' / 'Dushnila' / 'CO2 absorption coefficient, cm-1.csv') # вот так должно быть: SRC / 'CO2 absorption coefficient, cm-1.csv'
-        return  pd.read_csv(SRC_True, delimiter=';').replace(to_replace=',', value =  '.', regex = True).astype('float')
+        SRC = Path(os.getcwd()+'/Documents/Github/Dushnila/CO2 absorption coefficient, cm-1.csv')
+        #SRC = (Path(os.getcwd()) / 'CO2 absorption coefficient, cm-1.csv')
+        return  pd.read_csv(SRC, delimiter=';').replace(to_replace=',', value =  '.', regex = True).astype('float')
 
     def updateGraph():
         '''!!! Функция для обновления графика'''
