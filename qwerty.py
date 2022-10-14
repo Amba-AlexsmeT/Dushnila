@@ -1,12 +1,8 @@
 import numpy
 import random
 import pylab
-
-
 import hapi
-
 import pandas as pd
-
 from pylab import GridSpec
 from matplotlib.widgets import Slider
 from pathlib import Path
@@ -97,7 +93,7 @@ if __name__ == '__main__':
 #YFXFKJ KZNCRJQ GHJUHFVVS
     # Создадим окно с графиком
 
-    gd = GridSpec(2,4)
+    gd = GridSpec(2,2)
 
     fig = pylab.subplots(gd[2:0,2:])
     graph_1= pylab.subplots(gd[0])
