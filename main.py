@@ -1,7 +1,7 @@
 import numpy
 import random
 import pylab
-import hapi
+from hapi import *
 import pandas as pd
 from pylab import GridSpec
 from matplotlib.widgets import Slider
@@ -39,7 +39,8 @@ def third_y(T, P , x, cons):
 
 if __name__ == '__main__':
     def slava_merlow():
-        return  pd.read_csv('/Users/nikraut/Desktop/la/qwe.csv', delimiter=';').replace(to_replace=',', value =  '.', regex = True).astype('float')
+        # вот так должно быть: CO2 absorption coefficient, cm-1.csv
+        return  pd.read_csv('/Users/nikraut/Documents/Github/dushnila/CO2 absorption coefficient, cm-1.csv', delimiter=';').replace(to_replace=',', value =  '.', regex = True).astype('float')
 
     def updateGraph():
         '''!!! Функция для обновления графика'''
@@ -93,13 +94,15 @@ if __name__ == '__main__':
 #YFXFKJ KZNCRJQ GHJUHFVVS
     # Создадим окно с графиком
 
-    gd = GridSpec(2,2)
+    #gd = GridSpec(3,2)
 
-    fig = pylab.subplots(gd[2:0,2:])
-    graph_1= pylab.subplots(gd[0])
-    graph_2= pylab.subplots(gd[1])
-    graph_3= pylab.subplots(gd[1:0])
-    graph_4= pylab.subplots(gd[1:1])
+    fig, (graph_1, graph_2, graph_3, graph_4) = pylab.subplots(4)
+
+#   fig = pylab.subplots(gd[2:0,2:])
+#    graph_1 = pylab.subplots(gd[0])
+#    graph_2 = pylab.subplots(gd[1])
+#    graph_3 = pylab.subplots(gd[1:0])
+#    graph_4 = pylab.subplots(gd[1:1])
 
     graph_1.grid()
     graph_2.grid()
