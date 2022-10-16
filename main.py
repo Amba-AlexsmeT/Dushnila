@@ -39,8 +39,10 @@ def third_y(T, P , x, cons):
 
 if __name__ == '__main__':
     def slava_merlow():
-        # вот так должно быть: CO2 absorption coefficient, cm-1.csv
-        return  pd.read_csv('/Users/nikraut/Documents/Github/dushnila/CO2 absorption coefficient, cm-1.csv', delimiter=';').replace(to_replace=',', value =  '.', regex = True).astype('float')
+
+        SRC = Path(os.getcwd()+'/Documents/Github/Dushnila/CO2 absorption coefficient, cm-1.csv')
+        #SRC = (Path(os.getcwd()) / 'CO2 absorption coefficient, cm-1.csv')
+        return  pd.read_csv(SRC, delimiter=';').replace(to_replace=',', value =  '.', regex = True).astype('float')
 
     def updateGraph():
         '''!!! Функция для обновления графика'''
@@ -94,24 +96,15 @@ if __name__ == '__main__':
 #YFXFKJ KZNCRJQ GHJUHFVVS
     # Создадим окно с графиком
 
-    #gd = GridSpec(3,2)
-
-    fig, (graph_1, graph_2, graph_3, graph_4) = pylab.subplots(4)
-
-#   fig = pylab.subplots(gd[2:0,2:])
-#    graph_1 = pylab.subplots(gd[0])
-#    graph_2 = pylab.subplots(gd[1])
-#    graph_3 = pylab.subplots(gd[1:0])
-#    graph_4 = pylab.subplots(gd[1:1])
+    graph_1 = pylab.subplot2grid((3,2),(0,0))
+    graph_2 = pylab.subplot2grid((3,2),(0,1))
+    graph_3 = pylab.subplot2grid((3,2),(1,0))
+    graph_4 = pylab.subplot2grid((3,2),(1,1))
 
     graph_1.grid()
     graph_2.grid()
     graph_3.grid()
     graph_4.grid()
-
-    # Оставим снизу от графика место для виджетов
-    fig.subplots_adjust(left=0.07, right=0.95, top=0.95, bottom=0.4)
-
 
 
     # Создание слайдера для задания T
@@ -155,4 +148,3 @@ if __name__ == '__main__':
     updateGraph()
 
     pylab.show()
->>>>>>> master
