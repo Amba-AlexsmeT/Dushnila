@@ -2,17 +2,14 @@
 import numpy
 import random
 import pylab
-from hapi import *
+from our_hapi import export, AC
 import pandas as pd
 from pylab import GridSpec
 from matplotlib.widgets import Slider
 from pathlib import Path
 import os
 
-# подгружаем базу данных хитрана для СО2
-
-db_begin('data')
-fetch_by_ids('CO2', [7, 8, 9, 10], 3589.1, 3590.199)
+export()
 
 #<-------функции------->
 def Y_ax(T, P, n, cons, name = "Lorentz"):
@@ -26,10 +23,12 @@ def Y_ax(T, P, n, cons, name = "Lorentz"):
     cert_GammaL = 'gamma_self'
     cert_Diluent = {'self':cons, 'air': 1-cons}
 
-    k = -(eval('absorptionCoefficient_'+name)(isotopes, substance, Environment = cert_Environment, OmegaStep = cert_OmegaStep, GammaL = cert_GammaL, Diluent = cert_Diluent,HITRAN_units = True)[1])
+    k = -(AC(name)(isotopes, substance, Environment = cert_Environment, OmegaStep = cert_OmegaStep, GammaL = cert_GammaL, Diluent = cert_Diluent,HITRAN_units = True)[1])
 
     return 1-numpy.exp(k*n*47)
 
+#def paint(x, T, P, n , cons , name, data):
+    
 
 def slava_merlow():
     '''Функция для загрузки данных'''
@@ -48,6 +47,8 @@ def updateGraph():
     global graph_2
     global graph_3
     global graph_4
+    global graph_5
+    global graph_6
     global grid_visible
     global data
     
@@ -71,29 +72,42 @@ def updateGraph():
     
     
     # задаем икс
-    x = absorptionCoefficient_Lorentz(((2,1), (2,2), (2,3), (2,4), ), 'CO2', Environment = {'p': P, 'T':T}, OmegaStep=0.001, GammaL = 'gamma_self', HITRAN_units = True)[0]
+    x = numpy.round(AC("Lorentz")(((2,1), (2,2), (2,3), (2,4), ), 'CO2', Environment = {'p': P, 'T':T}, OmegaStep=0.001, GammaL = 'gamma_self', HITRAN_units = True)[0], 3)
+    
    
-
     # обновляем разные графики
     graph_1.clear()
     graph_1.grid()
-    graph_1.plot(x, Y_ax(T, P, n , cons , 'Lorentz'),data['Wavenumber, cm-1'],data['Lorentz']) #тут мы задаем икс который мы определили выше, и строим график славы, собирая данные из его данных
+    graph_1.plot(x, Y_ax(T, P, n , cons , 'Lorentz'),data['Wavenumber, cm-1'][2:-6:],data['Lorentz'][2:-6:]) #тут мы задаем икс который мы определили выше, и строим график славы, собирая данные из его данных
     graph_1.legend(['Lorentz', 'Slava'])
 
     graph_2.clear()
     graph_2.grid()
-    graph_2.plot(x, Y_ax(T, P, n , cons, 'Doppler'),data['Wavenumber, cm-1'],data['Doppler'])
+    graph_2.plot(x, Y_ax(T, P, n , cons, 'Doppler'),data['Wavenumber, cm-1'][2:-6:],data['Doppler'][2:-6:])
     graph_2.legend(['Doppler', 'Slava'])
 
     graph_3.clear()
     graph_3.grid()
-    graph_3.plot(x, Y_ax(T, P, n , cons, 'Voigt'),data['Wavenumber, cm-1'],data['Voigt'])
+    graph_3.plot(x, Y_ax(T, P, n , cons, 'Voigt'),data['Wavenumber, cm-1'][2:-6:],data['Voigt'][2:-6:])
     graph_3.legend(['Voigt', 'Slava'])
+    
+   
 
     graph_4.clear()
     graph_4.grid()
-    graph_4.plot(x, Y_ax(T, P, n, cons, 'Voigt'),data['Wavenumber, cm-1'],data['Voigt'])
-    graph_4.legend(['Voigt', 'Slava'])
+    graph_4.plot(x,abs(Y_ax(T, P, n, cons, 'Lorentz')-data['Lorentz'][2:-6:]))
+    graph_4.legend(['L - S'])
+    
+    graph_5.clear()
+    graph_5.grid()
+    graph_5.plot(x, abs(Y_ax(T, P, n , cons , 'Doppler')-data['Doppler'][2:-6:]))
+    
+    graph_6.clear()
+    graph_6.grid()
+    graph_6.plot(x, abs(Y_ax(T, P, n , cons , 'Voigt')-data['Voigt'][2:-6:]))
+    graph_6.legend(['Lorentz', 'Slava'])
+    
+    
 
     pylab.draw()
 
@@ -105,16 +119,20 @@ def onChangeValue(value):
 # Создадим окно с графиком
 
 # обозначаем, где собственно находяться графики
-graph_1 = pylab.subplot2grid((3,2),(0,0))
-graph_2 = pylab.subplot2grid((3,2),(0,1))
-graph_3 = pylab.subplot2grid((3,2),(1,0))
-graph_4 = pylab.subplot2grid((3,2),(1,1))
+graph_1 = pylab.subplot2grid((3,3),(0,0))
+graph_2 = pylab.subplot2grid((3,3),(0,1))
+graph_3 = pylab.subplot2grid((3,3),(0,2))
+graph_4 = pylab.subplot2grid((3,3),(1,0))
+graph_5 = pylab.subplot2grid((3,3),(1,1))
+graph_6 = pylab.subplot2grid((3,3),(1,2))
 
 # для каждого графики ставим решетку-разметку
 graph_1.grid()
 graph_2.grid()
 graph_3.grid()
 graph_4.grid()
+graph_5.grid()
+graph_6.grid()
 
 
 # Создание слайдера для задания температуры Т
