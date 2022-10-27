@@ -8,24 +8,30 @@ from pylab import GridSpec
 from matplotlib.widgets import Slider
 from pathlib import Path
 import os
+from hapi import *
 
-export()
+db_begin("H2O")
+fetch_by_ids("H2O", [1, 2, 3, 4, 5, 6],  7182.0, 7184.0)
+nu_H2O, sw_H2O = getColumns('H2O', ["nu", "sw"])
+
+
+
 
 #<-------функции------->
 def Y_ax(T, P, n, cons, name = "Lorentz"):
     '''функция высчитывания значения y'''
 
     # переменные для коэфициента
-    isotopes = ((2,1), (2,2), (2,3), (2,4), )
-    substance = 'CO2'
+    isotopes = ((1,1), (1,2), (1,3), (1,4), )
+    substance = 'H2O'
     cert_Environment = {'p': P, 'T':T}
     cert_OmegaStep = 0.001
     cert_GammaL = 'gamma_self'
     cert_Diluent = {'self':cons, 'air': 1-cons}
 
-    k = -(AC(name)(isotopes, substance, Environment = cert_Environment, OmegaStep = cert_OmegaStep, GammaL = cert_GammaL, Diluent = cert_Diluent,HITRAN_units = True)[1])
+    k = -(AC(name)(isotopes, substance, Environment = cert_Environment, OmegaStep = cert_OmegaStep, GammaL = cert_GammaL, Diluent = cert_Diluent, HITRAN_units = True)[1])
 
-    return 1-numpy.exp(k*n*47)
+    return 1-k*10**20  #1-numpy.exp(k*n*47)
 
 #def paint(x, T, P, n , cons , name, data):
     
@@ -34,7 +40,7 @@ def slava_merlow():
     '''Функция для загрузки данных'''
     
     SRC = Path(os.getcwd() + '/CO2 absorption coefficient, cm-1.csv')
-    return  pd.read_csv(SRC, delimiter=';').replace(to_replace=',', value =  '.', regex = True).astype('float')
+    return  pd.read_csv('/users/nikraut/downloads/калибровка.txt', delimiter='\t').replace(to_replace=',', value =  '.', regex = True).astype('float'), pd.read_csv('/users/nikraut/downloads/2.txt', delimiter='\t').replace(to_replace=',', value =  '.', regex = True).astype('float')
 
 def updateGraph():
     '''!!! Функция для обновления графика'''
@@ -53,7 +59,7 @@ def updateGraph():
     global data
     
     # Подгружаем дату
-    data = slava_merlow()
+    data_kal, data_2 = slava_merlow()
 
     # Используем атрибут val, чтобы получить значение слайдеров
     T = slider_T.val
@@ -72,15 +78,15 @@ def updateGraph():
     
     
     # задаем икс
-    x = numpy.round(AC("Lorentz")(((2,1), (2,2), (2,3), (2,4), ), 'CO2', Environment = {'p': P, 'T':T}, OmegaStep=0.001, GammaL = 'gamma_self', HITRAN_units = True)[0], 3)
+    x = numpy.round(AC("Lorentz")(((1,1), (1,2), (1,3), (1,4), ), 'H2O', Environment = {'p': P, 'T':T}, OmegaStep=0.001, GammaL = 'gamma_self', HITRAN_units = True)[0], 3)
     
    
     # обновляем разные графики
     graph_1.clear()
     graph_1.grid()
-    graph_1.plot(x, Y_ax(T, P, n , cons , 'Lorentz'),data['Wavenumber, cm-1'][2:-6:],data['Lorentz'][2:-6:]) #тут мы задаем икс который мы определили выше, и строим график славы, собирая данные из его данных
+    graph_1.plot(x, Y_ax(T, P, n , cons , 'Lorentz'),data_2['Time - ADC Voltage'][2:-6:]*1.5/70+7183.61,1 - data_2['Amplitude - ADC Voltage'][2:-6:]) #тут мы задаем икс который мы определили выше, и строим график славы, собирая данные из его данных
     graph_1.legend(['Lorentz', 'Slava'])
-
+    """
     graph_2.clear()
     graph_2.grid()
     graph_2.plot(x, Y_ax(T, P, n , cons, 'Doppler'),data['Wavenumber, cm-1'][2:-6:],data['Doppler'][2:-6:])
@@ -101,12 +107,13 @@ def updateGraph():
     graph_5.clear()
     graph_5.grid()
     graph_5.plot(x, abs(Y_ax(T, P, n , cons , 'Doppler')-data['Doppler'][2:-6:]))
-    
+    graph_5.legend(['D - S'])
+        
     graph_6.clear()
     graph_6.grid()
     graph_6.plot(x, abs(Y_ax(T, P, n , cons , 'Voigt')-data['Voigt'][2:-6:]))
-    graph_6.legend(['Lorentz', 'Slava'])
-    
+    graph_6.legend(['V - S'])
+    """
     
 
     pylab.draw()
@@ -170,6 +177,7 @@ slider_cons = Slider(axes_slider_cons,
 
 # Подпишемся на событие при изменении значения слайдера.
 slider_cons.on_changed(onChangeValue)
+#slider_cons.on_changed(onChangeValue)
 
 
 # запускаем первый раз функцию, чтобы отрисовать
